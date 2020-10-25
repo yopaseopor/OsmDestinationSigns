@@ -590,12 +590,12 @@ sub parseData {
           $o .= "<div class=\"symbol\"><div class=\"$s->{symbol}\">&nbsp;</div></div>" if $s->{symbol};
           if ($db->{relation}{$w}{'tags'}{'osmc:symbol'}) {
             my $osmc = $db->{relation}{$w}{'tags'}{'osmc:symbol'};
-            $o .= "<div class=\"symbol\"><img src=\"../../osmc/generate.pl?osmc=".$osmc."&opt=rectborder&size=32&out=svg\"></div>";
+            $o .= "<div class=\"symbol\"><img src=\"../osmc/generate.pl?osmc=".$osmc."&opt=rectborder&size=32&out=svg\"></div>";
             }
           elsif($s->{waysymbol} && scalar @{$s->{waysymbol}}) {
             $o .= "<div class=\"symbol\">";
             foreach my $osmc (@{$s->{waysymbol}}) {
-              $o .= "<img src=\"../../osmc/generate.pl?osmc=".$osmc."&opt=rectborder&size=32&out=svg\">";            
+              $o .= "<img src=\"../osmc/generate.pl?osmc=".$osmc."&opt=rectborder&size=32&out=svg\">";            
               }
             $o .= "</div>";  
             }
@@ -641,7 +641,7 @@ sub parseData {
         $o .= "<div class=\"dest\">$s->{deststring}</div>";
         if ($db->{node}{$sign}{'tags'}{'osmc:symbol'}) {
           my $osmc = $db->{node}{$sign}{'tags'}{'osmc:symbol'};
-          $o .= "<div class=\"symbol\"><img src=\"../../osmc/generate.pl?osmc=".$osmc."&opt=rectborder&size=32&out=svg\"></div>";
+          $o .= "<div class=\"symbol\"><img src=\"../osmc/generate.pl?osmc=".$osmc."&opt=rectborder&size=32&out=svg\"></div>";
           }        
         $o .= "</div>";
         push(@$d,dclone $s);
