@@ -89,7 +89,7 @@ function getsvgsign(d) {
   }  
   
 function loaddata_i(mydata) {
-  var url = '../../destinations/code/generate.pl';
+  var url = '../code/generate.pl';
   
   mydata.direction = 0;
   mydata.country = document.getElementsByName("country")[0].value;
