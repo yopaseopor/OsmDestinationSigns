@@ -1,71 +1,56 @@
-//#include "Permalink.js
+L.Permalink = {
+    //gets the map center, zoom-level and rotation from the URL if present, else uses default values
+    getMapLocation: function (zoom, center) {
+        'use strict';
+        zoom = (zoom || zoom === 0) ? zoom : 18;
+        center = (center) ? center : [52.26869, -113.81034];
 
-L.Control.Permalink.include({
-	/*
-	options: {
-		useMarker: true,
-		markerOptions: {}
-	},
-	*/
+        if (window.location.hash !== '') {
+            var hash = window.location.hash.replace('#', '');
+            var parts = hash.split(',');
+            if (parts.length === 3) {
+                center = {
+                    lat: parseFloat(parts[0]),
+                    lng: parseFloat(parts[1])
+                };
+                zoom = parseInt(parts[2].slice(0, -1), 10);
+            }
+        }
+        return {zoom: zoom, center: center};
+    },
 
-	initialize_layer: function () {
-		this.on('update', this._set_layer, this);
-		this.on('add', this._onadd_layer, this);
-	},
+    setup: function (map) {
+        'use strict';
+        var shouldUpdate = true;
+        var updatePermalink = function () {
+            if (!shouldUpdate) {
+                // do not update the URL when the view was changed in the 'popstate' handler (browser history navigation)
+                shouldUpdate = true;
+                return;
+            }
 
-	_onadd_layer: function () {
-		this._map.on('layeradd', this._update_layer, this);
-		this._map.on('layerremove', this._update_layer, this);
-		this._update_layer();
-	},
+            var center = map.getCenter();
+            var hash = '#' +
+                    Math.round(center.lat * 100000) / 100000 + ',' +
+                    Math.round(center.lng * 100000) / 100000 + ',' +
+                    map.getZoom() + 'z';
+            var state = {
+                zoom: map.getZoom(),
+                center: center
+            };
+            window.history.pushState(state, 'map', hash);
+        };
 
-	_update_layer: function () {
-		if (!this.options.layers) return;
-		var layer = this.options.layers.currentBaseLayer();
-		if (layer)
-			this._update({layer: layer.name});
-	},
+        map.on('moveend', updatePermalink);
 
-	_set_layer: function (e) {
-		var p = e.params;
-		if (!this.options.layers || !p.layer) return;
-		this.options.layers.chooseBaseLayer(p.layer);
-	}
-});
-
-L.Control.Layers.include({
-	chooseBaseLayer: function (name) {
-		var layer, obj;
-		for (var i in this._layers) {
-			if (!this._layers.hasOwnProperty(i))
-				continue;
-			obj = this._layers[i];
-			if (!obj.overlay && obj.name === name)
-				layer = obj.layer;
-		}
-		if (!layer || this._map.hasLayer(layer))
-			return;
-
-		for (var j in this._layers) {
-			if (!this._layers.hasOwnProperty(j))
-				continue;
-			obj = this._layers[j];
-			if (!obj.overlay && this._map.hasLayer(obj.layer))
-				this._map.removeLayer(obj.layer);
-		}
-		this._map.addLayer(layer);
-		this._update();
-	},
-
-	currentBaseLayer: function () {
-		for (var i in this._layers) {
-			if (!this._layers.hasOwnProperty(i))
-				continue;
-			var obj = this._layers[i];
-			if (obj.overlay) continue;
-			if (!obj.overlay && this._map.hasLayer(obj.layer))
-				return obj;
-		}
-	}
-});
-
+        // restore the view state when navigating through the history, see
+        // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
+        window.addEventListener('popstate', function (event) {
+            if (event.state === null) {
+                return;
+            }
+            map.setView(event.state.center, event.state.zoom);
+            shouldUpdate = false;
+        });
+    }
+};
